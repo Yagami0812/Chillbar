@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Date Reservation App</title>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; padding: 30px; max-width: 600px; margin: auto; }
+    h1 { text-align: center; color: #333; }
+    form, .search-box, .reservation-list { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    label, input, button { display: block; width: 100%; margin-bottom: 15px; font-size: 16px; }
+    input, button { padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .reservation-item { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
+    .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    .delete-btn:hover { background: #b52a3a; }
+  </style>
+</head>
+<body>
+  <h1>Reserve a Date for Your Occasion</h1>
+  <form id="reservationForm">
+    <label for="name">Your Name:</label>
+    <input type="text" id="name" required>
+    <label for="date">Choose a Date:</label>
+    <input type="date" id="date" required>
+    <button type="submit">Reserve Date</button>
+  </form>
+  <input type="text" id="searchInput" class="search-box" placeholder="Search by name or date...">
+  <div class="reservation-list" id="reservationList">
+    <h2>Reserved Dates:</h2>
+  </div>
+  <script>
+    const reservationForm = document.getElementById('reservationForm');
+    const reservationList = document.getElementById('reservationList');
+    const searchInput = document.getElementById('searchInput');
+    let reservations = JSON.parse(localStorage.getItem('reservations')) || [];
+    displayReservations();
+    reservationForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const date = document.getElementById('date').value;
+      if (!name || !date) { alert("Please fill out both fields."); return; }
+      const dateTaken = reservations.find(r => r.date === date);
+      if (dateTaken) { alert(`Sorry, ${date} has already been reserved by ${dateTaken.name}.`); return; }
+      const reservation = { name, date };
+      reservations.push(reservation);
+      localStorage.setItem('reservations', JSON.stringify(reservations));
+      displayReservations();
+      reservationForm.reset();
+    });
+    function displayReservations(filteredList = reservations) {
+      const list = filteredList.map((r, index) =>
+        `<div class="reservation-item">
+          <div><strong>${r.name}</strong> reserved <strong>${r.date}</strong></div>
+          <button class="delete-btn" onclick="deleteReservation(${index})">Delete</button>
+        </div>`
+      ).join('');
+      reservationList.innerHTML = `<h2>Reserved Dates:</h2>` + (list || "<p>No reservations found.</p>");
+    }
+    function deleteReservation(index) {
+      if (confirm("Are you sure you want to delete this reservation?")) {
+        reservations.splice(index, 1);
+        localStorage.setItem('reservations', JSON.stringify(reservations));
+        displayReservations();
+      }
+    }
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      const filtered = reservations.filter(r =>
+        r.name.toLowerCase().includes(query) || r.date.includes(query)
+      );
+      displayReservations(filtered);
+    });
+  </script>
+</body>
+</html>
