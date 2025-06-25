@@ -32,7 +32,7 @@ app.add_middleware(
 
 # MongoDB connection
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
-client = MongoClient(MONGO_URL)
+client = MongoClient(MONGO_URL, tls=True, tlsAllowInvalidCertificates=True)
 db = client.restaurant_reservations
 
 # Collections
