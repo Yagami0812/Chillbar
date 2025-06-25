@@ -1,4 +1,5 @@
 # Render deployment configuration
+pythonVersion: 3.11.6
 version: 1
 services:
   - type: web
